@@ -14,7 +14,7 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
   bot.oauth_token_secret = "c6YQJN1XOiqG1EoaNoNatNTisPeFYriGaFCxe9cYYokNU" # Secret connecting the app to this account
 
   bot.on_startup do 
-    for i in 0..10
+    for i in 0..3
       model = Ebooks::Model.load("model/karlnp.model")
       bot.tweet(model.make_statement(140))
     end
@@ -28,7 +28,8 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
 
   bot.on_follow do |user|
     # Follow a user back
-    # bot.follow(user[:screen_name])
+     bot.follow(user[:screen_name])
+     bot.reply(user[:screen_name] + model.make_response("Thanks for the follow!", 130))
   end
 
   bot.on_mention do |tweet, meta|
