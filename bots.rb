@@ -15,7 +15,7 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
 
   bot.on_startup do 
     for i in 0..3
-      model = Ebooks::Model.load("model/karlnp.model")
+      model = Ebooks::Model.load("model/tweets.model")
       #model = Ebooks::Model.load("model/combined.model")
       bot.tweet(model.make_statement(140))
     end
