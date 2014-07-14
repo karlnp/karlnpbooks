@@ -35,7 +35,7 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
 
   bot.on_mention do |tweet, meta|
     # Reply to a mention
-    # bot.reply(tweet, meta[:reply_prefix] + "oh hullo")
+    bot.reply(tweet, meta[:reply_prefix] + model.make_response(tweet, 110))
   end
 
   bot.on_timeline do |tweet, meta|
