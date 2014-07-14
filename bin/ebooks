@@ -1,0 +1,217 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require 'twitter_ebooks'
+require 'csv'
+
+$debug = true
+
+module Ebooks
+  APP_PATH = Dir.pwd # XXX do some recursive thing instead
+
+  def self.new(reponame)
+    usage = <<STR
+Usage: ebooks new <reponame>
+
+Creates a new skeleton repository defining a template bot in
+the current working directory specified by <reponame>.
+STR
+
+    if reponame.nil?
+      log usage
+      exit
+    end
+
+    path = "./#{reponame}"
+
+    if File.exists?(path)
+      log "#{path} already exists. Please remove if you want to recreate."
+      exit
+    end
+
+    FileUtils.cp_r(SKELETON_PATH, path)
+
+    File.open(File.join(path, 'bots.rb'), 'w') do |f|
+      template = File.read(File.join(SKELETON_PATH, 'bots.rb'))
+      f.write(template.gsub("{{BOT_NAME}}", reponame))
+    end
+
+    log "New twitter_ebooks app created at #{reponame}"
+  end
+
+  def self.consume(pathes)
+    usage = <<STR
+Usage: ebooks consume <corpus_path> [corpus_path2] [...]
+
+Processes some number of text files or json tweet corpuses
+into usable models. These will be output at model/<name>.model
+STR
+
+    if pathes.empty?
+      log usage
+      exit
+    end
+
+    pathes.each do |path|
+      filename = File.basename(path)
+      shortname = filename.split('.')[0..-2].join('.')
+
+      outpath = File.join(APP_PATH, 'model', "#{shortname}.model")
+      Model.consume(path).save(outpath)
+      log "Corpus consumed to #{outpath}"
+    end
+  end
+
+  def self.gen(model_path, input)
+    usage = <<STR
+Usage: ebooks gen <model_path> [input]
+
+Make a test tweet from the processed model at <model_path>.
+Will respond to input if provided.
+STR
+    if model_path.nil?
+      log usage
+      exit
+    end
+
+    model = Model.load(model_path)
+    if input && !input.empty?
+      puts "@cmd " + model.make_response(input, 135)
+    else
+      puts model.make_statement
+    end
+  end
+
+  def self.score(model_path, input)
+    usage = <<STR
+Usage: ebooks score <model_path> <input>
+
+Scores "interest" in some text input according to how
+well unique keywords match the model.
+STR
+    if model_path.nil? || input.nil?
+      log usage
+      exit
+    end
+
+    model = Model.load(model_path)
+    model.score_interest(input)
+  end
+
+  def self.archive(username, outpath)
+    usage = <<STR
+Usage: ebooks archive <username> <outpath>
+
+Downloads a json corpus of the <username>'s tweets to <outpath>.
+Due to API limitations, this can only receive up to ~3000 tweets
+into the past.
+STR
+
+    if username.nil? || outpath.nil?
+      log usage
+      exit
+    end
+
+    Archive.new(username, outpath).sync
+  end
+
+  def self.tweet(modelpath, botname)
+    usage = <<STR
+Usage: ebooks tweet <model_path> <botname>
+
+Sends a public tweet from the specified bot using text
+from the processed model at <model_path>.
+STR
+
+    if modelpath.nil? || botname.nil?
+      log usage
+      exit
+    end
+
+    load File.join(APP_PATH, 'bots.rb')
+    model = Model.load(modelpath)
+    statement = model.make_statement
+    log "@#{botname}: #{statement}"
+    bot = Bot.get(botname)
+    bot.configure
+    bot.tweet(statement)
+  end
+
+  def self.jsonify(paths)
+    usage = <<STR
+Usage: ebooks jsonify <old_corpus_path> [old_corpus_path2] [...]
+
+Takes an old-style corpus of plain tweet text and converts it to json.
+STR
+
+    if paths.empty?
+      log usage
+      exit
+    end
+
+    paths.each do |path|
+      name = File.basename(path).split('.')[0]
+      new_path = name + ".json"
+
+      tweets = []
+      id = nil
+      if path.split('.')[-1] == "csv" #from twitter archive
+        csv_archive = CSV.read(path, :headers=>:first_row)
+        tweets = csv_archive.map do |tweet|
+          { text: tweet['text'], id: tweet['tweet_id'] }
+        end
+      else
+        File.read(path).split("\n").each do |l|
+          if l.start_with?('# ')
+            id = l.split('# ')[-1]
+          else
+            tweet = { text: l }
+            if id
+              tweet[:id] = id
+              id = nil
+            end
+            tweets << tweet
+          end
+        end
+      end
+
+      File.open(new_path, 'w') do |f|
+        log "Writing #{tweets.length} tweets to #{new_path}"
+        f.write(JSON.pretty_generate(tweets))
+      end
+    end
+  end
+
+  def self.command(args)
+    usage = <<STR
+Usage:
+     ebooks new <reponame>
+     ebooks consume <corpus_path> [corpus_path2] [...]
+     ebooks gen <model_path> [input]
+     ebooks score <model_path> <input>
+     ebooks archive <@user> <outpath>
+     ebooks tweet <model_path> <botname>
+     ebooks jsonify <old_corpus_path> [old_corpus_path2] [...]
+STR
+
+    if args.length == 0
+      log usage
+      exit
+    end
+
+    case args[0]
+    when "new" then new(args[1])
+    when "consume" then consume(args[1..-1])
+    when "gen" then gen(args[1], args[2..-1].join(' '))
+    when "score" then score(args[1], args[2..-1].join(' '))
+    when "archive" then archive(args[1], args[2])
+    when "tweet" then tweet(args[1], args[2])
+    when "jsonify" then jsonify(args[1..-1])
+    else
+      log usage
+      exit 1
+    end
+  end
+end
+
+Ebooks.command(ARGV)
