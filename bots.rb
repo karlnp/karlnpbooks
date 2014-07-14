@@ -14,11 +14,9 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
   bot.oauth_token_secret = "c6YQJN1XOiqG1EoaNoNatNTisPeFYriGaFCxe9cYYokNU" # Secret connecting the app to this account
 
   bot.on_startup do 
-    for i in 0..3
       model = Ebooks::Model.load("model/tweets.model")
       #model = Ebooks::Model.load("model/combined.model")
       bot.tweet(model.make_statement(140))
-    end
   end
 
 
@@ -37,7 +35,7 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
   bot.on_mention do |tweet, meta|
     # Reply to a mention
      model = Ebooks::Model.load("model/karlnp.model")
-    bot.reply(tweet, meta[:reply_prefix] + model.make_response(tweet, 110))
+    bot.reply(tweet, meta[:reply_prefix] + model.make_response(tweet.text, 110))
   end
 
   bot.on_timeline do |tweet, meta|
