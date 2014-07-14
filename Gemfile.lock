@@ -53,7 +53,7 @@ GEM
       faraday (~> 0.8, < 0.10)
       multi_json (~> 1.0)
       simple_oauth (~> 0.2)
-    twitter_ebooks_dev (2.2.6.0.6)
+    twitter_ebooks_dev (2.2.6.0.7)
       engtagger
       fast-stemmer
       gingerice
