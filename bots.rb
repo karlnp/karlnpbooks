@@ -33,6 +33,7 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
   end
 
   bot.on_favorite do |user|
+    model = Ebooks::Model.load("model/karlnp.model")
     bot.follow(user[:screen_name])
     bot.tweet(user[:screen_name] + model.make_response("Favorite tweets are great", 110))
   end
