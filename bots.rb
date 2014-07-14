@@ -29,12 +29,14 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
 
   bot.on_follow do |user|
     # Follow a user back
+     model = Ebooks::Model.load("model/karlnp.model")
      bot.follow(user[:screen_name])
      bot.reply(user[:screen_name] + model.make_response("Thanks for the follow!", 130))
   end
 
   bot.on_mention do |tweet, meta|
     # Reply to a mention
+     model = Ebooks::Model.load("model/karlnp.model")
     bot.reply(tweet, meta[:reply_prefix] + model.make_response(tweet, 110))
   end
 
