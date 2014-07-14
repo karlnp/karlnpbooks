@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'twitter_ebooks'
+require 'twitter_ebooks_dev'
 
 # This is an example bot definition with event handlers commented out
 # You can define as many of these as you like; they will run simultaneously
@@ -30,6 +30,11 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
      model = Ebooks::Model.load("model/karlnp.model")
      bot.follow(user[:screen_name])
      bot.reply(user[:screen_name] + model.make_response("Thanks for the follow!", 130))
+  end
+
+  bot.on_favorite do |user|
+    bot.follow(user[:screen_name])
+    bot.tweet(user[:screen_name] + model.make_response("Favorite tweets are great", 110))
   end
 
   bot.on_mention do |tweet, meta|
