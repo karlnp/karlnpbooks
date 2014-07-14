@@ -1,5 +1,6 @@
 GEM
   remote: http://rubygems.org/
+  remote: https://7Xgcx6zGn97MqckvUTZG@gem.fury.io/karlnp/
   specs:
     addressable (2.3.6)
     awesome_print (1.2.0)
@@ -34,7 +35,7 @@ GEM
       whatlanguage (>= 1.0.0)
     htmlentities (4.3.2)
     http_parser.rb (0.6.0)
-    minitest (5.3.4)
+    minitest (5.4.0)
     multi_json (1.10.1)
     multipart-post (2.0.0)
     redis (3.1.0)
@@ -52,7 +53,7 @@ GEM
       faraday (~> 0.8, < 0.10)
       multi_json (~> 1.0)
       simple_oauth (~> 0.2)
-    twitter_ebooks (2.2.5)
+    twitter_ebooks_dev (2.2.6.0.1)
       engtagger
       fast-stemmer
       gingerice
@@ -71,4 +72,4 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  twitter_ebooks
+  twitter_ebooks_dev
