@@ -13,8 +13,22 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
   bot.oauth_token = "2573471509-CBtvONN47me1t0ref03EWtoWj2DczVEwo5PrgKD" # Token connecting the app to this account
   bot.oauth_token_secret = "c6YQJN1XOiqG1EoaNoNatNTisPeFYriGaFCxe9cYYokNU" # Secret connecting the app to this account
 
+
+    favstrings = [ "Favourite favourites are great tweets!",
+    "painters, though... hm.",
+    "Is there any way I can tell the Twitter app to not show me when my friends favourite blocked accounts' tweets",
+    "lying cat is my favourite comic character",
+    "first to space but mysteriously disappeared",
+    "princess is my favourite so far.",
+    "This is also my favourite part of my shirt.",
+    "My favourite thing about my new shirt.",
+    "because of pieces like this. Great work. :)",
+    "fyi"]
+
+
+
   bot.on_startup do 
-      model = Ebooks::Model.load("model/tweets.model")
+      model = Ebooks::Model.load("model/karlnp.model")
       #model = Ebooks::Model.load("model/combined.model")
       bot.tweet(model.make_statement(140))
   end
@@ -22,7 +36,7 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
 
   bot.on_message do |dm|
     # Reply to a DM
-    # bot.reply(dm, "secret secrets")
+     bot.reply(dm, "sssssssh. don't tell anyone")
   end
 
   bot.on_follow do |user|
@@ -35,7 +49,9 @@ Ebooks::Bot.new("karlnp_ebooks") do |bot|
   bot.on_favorite do |user|
     model = Ebooks::Model.load("model/karlnp.model")
     bot.follow(user[:screen_name])
-    bot.tweet("@"+ user[:screen_name] + " " + model.make_response("Favorite tweets are great", 110))
+    if rand(10) == 1 then
+        bot.tweet("@"+ user[:screen_name] + " " + model.make_response(favstrings.sample, 110))
+    end
   end
 
   bot.on_mention do |tweet, meta|
